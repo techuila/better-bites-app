@@ -6,7 +6,8 @@ import 'package:http/http.dart' as http;
 class FoodAiService {
   static const String _baseUrl = 'better-bites-be.onrender.com';
 
-  Future<FoodAnalysisResponse> analyzeFood(
+  // create private function
+  Future<FoodAnalysisResponse> _requestToAnalyzeFood(
       Map<String, dynamic> requestBody) async {
     final url = Uri.https(_baseUrl, 'analyze');
     try {
@@ -33,6 +34,23 @@ class FoodAiService {
     } catch (e) {
       debugPrint('Failed to analyze food: $e');
       throw Exception('Failed to analyze food: $e');
+    }
+  }
+
+  Future<void> analyzeFood(BuildContext context, String ingredients,
+      void Function(FoodAnalysisResponse) callback) async {
+    final payload = {'ingredients': ingredients};
+
+    try {
+      final foodAnalysisResponse = await _requestToAnalyzeFood(payload);
+
+      callback(foodAnalysisResponse);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error analyzing food: $e')),
+        );
+      }
     }
   }
 }

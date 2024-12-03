@@ -1,20 +1,42 @@
 class FoodAnalysisResponse {
-  final List<String> suggestedIngredients;
-  final String explanation;
-  final String healthRisks;
+  final List<Item> suitableIngredients;
+  final List<Item> unsuitableIngredients;
+  final List<Item> healthTips;
 
   FoodAnalysisResponse({
-    required this.suggestedIngredients,
-    required this.explanation,
-    required this.healthRisks,
+    required this.suitableIngredients,
+    required this.unsuitableIngredients,
+    required this.healthTips,
   });
 
   factory FoodAnalysisResponse.fromJson(Map<String, dynamic> json) {
     return FoodAnalysisResponse(
-      suggestedIngredients:
-          List<String>.from(json['suggested_ingredients'] ?? []),
-      explanation: json['explanation'] ?? '',
-      healthRisks: json['health_risks'] ?? '',
+      suitableIngredients: (json['suitable_ingredients'] as List)
+          .map((item) => Item.fromJson(item))
+          .toList(),
+      unsuitableIngredients: (json['unsuitable_ingredients'] as List)
+          .map((item) => Item.fromJson(item))
+          .toList(),
+      healthTips: (json['health_tips'] as List)
+          .map((item) => Item.fromJson(item))
+          .toList(),
+    );
+  }
+}
+
+class Item {
+  final String name;
+  final String description;
+
+  Item({
+    required this.name,
+    required this.description,
+  });
+
+  factory Item.fromJson(Map<String, dynamic> json) {
+    return Item(
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
     );
   }
 }

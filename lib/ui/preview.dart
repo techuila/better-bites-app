@@ -2,11 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:betterbitees/services/food_ai_service.dart';
+import 'package:betterbitees/services/text_recognition_service.dart';
 import 'package:betterbitees/ui/after_scan.dart';
 import 'package:betterbitees/ui/camera.dart';
-import 'package:betterbitees/ui/loading_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
 
 class Preview extends StatefulWidget {
@@ -20,74 +19,32 @@ class Preview extends StatefulWidget {
 
 class _PreviewState extends State<Preview> {
   final foodAiService = FoodAiService();
+  final textRecognition = TextRecognitionService();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _performTextRecognition(context, _analyzeFood);
+      textRecognition.recognizeText(
+          context, widget.imageFile, _textRecognitionCallback);
     });
   }
 
-  Future<void> _analyzeFood(BuildContext context, String ingredients) async {
-    final payload = {'ingredients': ingredients};
-
-    try {
-      final foodAnalysisResponse = await foodAiService.analyzeFood(payload);
-
+  Future<void> _textRecognitionCallback(
+      BuildContext context, String text) async {
+    await foodAiService.analyzeFood(context, text, (foodAnalysisResponse) {
       if (context.mounted) {
         // Navigate to the next screen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => AfterScan(
-              imagePath: widget.imageFile.path,
               foodAnalysisResponse: foodAnalysisResponse,
             ),
           ),
         );
       }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error analyzing food: $e')),
-        );
-      }
-    }
-  }
-
-  Future<void> _performTextRecognition(
-      BuildContext context, Function callback) async {
-    // Show the loading dialog
-    showLoadingDialog(context);
-
-    try {
-      // Initialize the TextRecognizer
-      final textRecognizer =
-          TextRecognizer(script: TextRecognitionScript.latin);
-
-      // Process the image using ML Kit
-      final inputImage = InputImage.fromFile(widget.imageFile);
-      final RecognizedText recognizedText =
-          await textRecognizer.processImage(inputImage);
-
-      textRecognizer.close();
-
-      if (context.mounted) {
-        // Perform the callback
-        await callback(context, recognizedText.text);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error processing image: $e')),
-        );
-      }
-    } finally {
-      if (context.mounted) {
-        closeLoadingDialog(context);
-      }
-    }
+    });
   }
 
   Future<void> _reuploadPhoto(BuildContext context) async {

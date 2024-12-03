@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:betterbitees/services/food_ai_service.dart';
+import 'package:betterbitees/services/text_recognition_service.dart';
 import 'package:betterbitees/ui/after_scan.dart';
 import 'package:betterbitees/ui/preview.dart';
 import 'package:betterbitees/ui/profiling.dart';
@@ -15,6 +17,8 @@ class Camera extends StatefulWidget {
 }
 
 class _CameraState extends State<Camera> {
+  final foodAiService = FoodAiService();
+  final textRecognition = TextRecognitionService();
   late CameraController _cameraController;
   late List<CameraDescription> _cameras;
   bool _isInitialized = false;
@@ -131,16 +135,10 @@ class _CameraState extends State<Camera> {
                         ),
                         FloatingActionButton(
                           backgroundColor: Colors.white,
-                          child: const Icon(Icons.camera, color: Colors.black),
                           onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => AfterScan(
-                                        imagePath: '',
-                                      )),
-                            );
+                            _capturePhoto(context);
                           },
+                          child: const Icon(Icons.camera, color: Colors.black),
                         ),
                         IconButton(
                           icon: const Icon(
@@ -270,6 +268,56 @@ class _CameraState extends State<Camera> {
     );
   }
 
+  Future<void> _performTextAndFoodAnalysis(BuildContext context) async {
+    textRecognition.recognizeText(context, _imageFile!,
+        (context, recognizedText) async {
+      await foodAiService.analyzeFood(context, recognizedText,
+          (foodAnalysisResponse) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AfterScan(
+              foodAnalysisResponse: foodAnalysisResponse,
+            ),
+          ),
+        );
+      });
+    });
+  }
+
+  Future<void> _capturePhoto(BuildContext context) async {
+    if (!_cameraController.value.isInitialized || _isUploading) return;
+
+    try {
+      // Capture the image
+      final XFile imageFile = await _cameraController.takePicture();
+
+      // Save the captured image to the `_imageFile` variable
+      setState(() {
+        _imageFile = File(imageFile.path);
+      });
+
+      if (_imageFile != null) {
+        // Pass the captured image to the text recognition service
+        if (context.mounted) {
+          _performTextAndFoodAnalysis(context);
+        }
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to capture image.')),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+  }
+
   Future<void> _uploadPhoto(BuildContext context) async {
     if (_isUploading) return;
     setState(() {
@@ -286,12 +334,7 @@ class _CameraState extends State<Camera> {
         });
 
         if (context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => Preview(imageFile: _imageFile!),
-            ),
-          );
+          _performTextAndFoodAnalysis(context);
         }
       } else {
         if (context.mounted) {
