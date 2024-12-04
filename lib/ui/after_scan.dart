@@ -1,52 +1,54 @@
+import 'dart:io';
+
 import 'package:betterbitees/services/DTOs/food_analysis.dart';
+import 'package:betterbitees/services/food_ai_service.dart';
+import 'package:betterbitees/services/text_recognition_service.dart';
 import 'package:betterbitees/ui/camera.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:flutter/material.dart';
 
 class AfterScan extends StatefulWidget {
-  final FoodAnalysisResponse foodAnalysisResponse;
+  final File imageFile;
 
-  const AfterScan({super.key, required this.foodAnalysisResponse});
+  const AfterScan({super.key, required this.imageFile});
 
   @override
   _AfterScanState createState() => _AfterScanState();
 }
 
 class _AfterScanState extends State<AfterScan> {
+  final foodAiService = FoodAiService();
+  final textRecognition = TextRecognitionService();
   int _selectedIndex = 0;
   bool _isLoading = true;
-
-  // Exit Dialog
-  Future<void> _onPopInvoked(bool didPop, Object? result) async {
-    if (didPop) {
-      return;
-    }
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm'),
-        content: const Text('Are you sure you want to go back?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Confirm'),
-          ),
-        ],
-      ),
-    );
-  }
+  FoodAnalysisResponse foodAnalysisResponse = FoodAnalysisResponse(
+    suitableIngredients: [],
+    unsuitableIngredients: [],
+    healthTips: [],
+  );
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 2), () {
-      setState(() {
-        _isLoading = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _performTextAndFoodAnalysis();
+    });
+  }
+
+  Future<void> _performTextAndFoodAnalysis() async {
+    textRecognition.recognizeText(context, widget.imageFile,
+        (recognizedText, error) async {
+      if (error != null) {
+        Navigator.of(context).pop(true);
+        return;
+      }
+
+      await foodAiService.analyzeFood(recognizedText!, (foodAnalysisResponse) {
+        setState(() {
+          this.foodAnalysisResponse = foodAnalysisResponse;
+          _isLoading = false;
+        });
       });
     });
   }
@@ -232,16 +234,14 @@ class _AfterScanState extends State<AfterScan> {
   Widget _buildBody() {
     switch (_selectedIndex) {
       case 0:
-        return _buildIngredientsList(
-            widget.foodAnalysisResponse.suitableIngredients);
+        return _buildIngredientsList(foodAnalysisResponse.suitableIngredients);
       case 1:
         return _buildIngredientsList(
-            widget.foodAnalysisResponse.unsuitableIngredients);
+            foodAnalysisResponse.unsuitableIngredients);
       case 2:
-        return _buildHealthSuggestions(widget.foodAnalysisResponse.healthTips);
+        return _buildHealthSuggestions(foodAnalysisResponse.healthTips);
       default:
-        return _buildIngredientsList(
-            widget.foodAnalysisResponse.suitableIngredients);
+        return _buildIngredientsList(foodAnalysisResponse.suitableIngredients);
     }
   }
 
@@ -310,6 +310,31 @@ class _AfterScanState extends State<AfterScan> {
           ),
         );
       },
+    );
+  }
+
+  // Exit Dialog
+  Future<void> _onPopInvoked(bool didPop, Object? result) async {
+    debugPrint('hello popped: $didPop ===============================');
+    if (didPop) {
+      return;
+    }
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm'),
+        content: const Text('Are you sure you want to go back?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
     );
   }
 

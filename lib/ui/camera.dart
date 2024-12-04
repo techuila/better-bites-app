@@ -1,9 +1,6 @@
 import 'dart:io';
 
-import 'package:betterbitees/services/food_ai_service.dart';
-import 'package:betterbitees/services/text_recognition_service.dart';
 import 'package:betterbitees/ui/after_scan.dart';
-import 'package:betterbitees/ui/preview.dart';
 import 'package:betterbitees/ui/profiling.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +14,6 @@ class Camera extends StatefulWidget {
 }
 
 class _CameraState extends State<Camera> {
-  final foodAiService = FoodAiService();
-  final textRecognition = TextRecognitionService();
   late CameraController _cameraController;
   late List<CameraDescription> _cameras;
   bool _isInitialized = false;
@@ -268,23 +263,6 @@ class _CameraState extends State<Camera> {
     );
   }
 
-  Future<void> _performTextAndFoodAnalysis(BuildContext context) async {
-    textRecognition.recognizeText(context, _imageFile!,
-        (context, recognizedText) async {
-      await foodAiService.analyzeFood(context, recognizedText,
-          (foodAnalysisResponse) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AfterScan(
-              foodAnalysisResponse: foodAnalysisResponse,
-            ),
-          ),
-        );
-      });
-    });
-  }
-
   Future<void> _capturePhoto(BuildContext context) async {
     if (!_cameraController.value.isInitialized || _isUploading) return;
 
@@ -300,7 +278,12 @@ class _CameraState extends State<Camera> {
       if (_imageFile != null) {
         // Pass the captured image to the text recognition service
         if (context.mounted) {
-          _performTextAndFoodAnalysis(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AfterScan(imageFile: _imageFile!),
+            ),
+          );
         }
       } else {
         if (context.mounted) {
@@ -334,7 +317,12 @@ class _CameraState extends State<Camera> {
         });
 
         if (context.mounted) {
-          _performTextAndFoodAnalysis(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AfterScan(imageFile: _imageFile!),
+            ),
+          );
         }
       } else {
         if (context.mounted) {

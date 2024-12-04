@@ -1,14 +1,12 @@
 import 'dart:io';
 
-import 'package:betterbitees/ui/loading_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
 class TextRecognitionService {
-  Future<void> recognizeText(BuildContext context, File imageFile,
-      Future<void> Function(BuildContext, String) callback) async {
+  void recognizeText(BuildContext context, File imageFile,
+      Future<void> Function(String?, Object?) callback) async {
     // Show the loading dialog
-    showLoadingDialog(context);
 
     try {
       // Initialize the TextRecognizer
@@ -22,20 +20,23 @@ class TextRecognitionService {
 
       textRecognizer.close();
 
+      debugPrint('Recognized text: ${recognizedText.text}');
+
+      if (recognizedText.text.trim().isEmpty) {
+        throw 'Error processing image: No text found in the image';
+      }
+
       if (context.mounted) {
         // Perform the callback
-        await callback(context, recognizedText.text);
+        await callback(recognizedText.text, null);
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error processing image: $e')),
+          SnackBar(content: Text(e.toString())),
         );
       }
-    } finally {
-      if (context.mounted) {
-        closeLoadingDialog(context);
-      }
+      callback(null, e);
     }
   }
 }

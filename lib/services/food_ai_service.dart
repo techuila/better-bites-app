@@ -5,11 +5,12 @@ import 'package:http/http.dart' as http;
 
 class FoodAiService {
   static const String _baseUrl = 'better-bites-be.onrender.com';
+  //static const String _baseUrl = '10.0.2.2:3000'; // for local testing
 
   // create private function
   Future<FoodAnalysisResponse> _requestToAnalyzeFood(
       Map<String, dynamic> requestBody) async {
-    final url = Uri.https(_baseUrl, 'analyze');
+    final url = Uri.http(_baseUrl, 'analyze');
     try {
       debugPrint('Requesting food analysis from $url');
 
@@ -21,36 +22,33 @@ class FoodAiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+
+        if (data['error'] != null) {
+          throw data['error'];
+        }
+
         final prettyJson = const JsonEncoder.withIndent('  ').convert(data);
         debugPrint('Food analysis response: $prettyJson');
         return FoodAnalysisResponse.fromJson(data);
       } else if (response.statusCode == 500) {
-        debugPrint('Failed to analyze food: ${response.body}');
-        throw jsonDecode(response.body);
+        debugPrint('Internal Server Error: ${response.body}');
+        throw 'Server Error: Encountered an error while processing the request';
       } else {
         debugPrint('Unexpected status code: ${response.statusCode}');
-        throw Exception('Unexpected status code: ${response.statusCode}');
+        throw 'Unexpected status code: ${response.statusCode}';
       }
     } catch (e) {
       debugPrint('Failed to analyze food: $e');
-      throw Exception('Failed to analyze food: $e');
+      throw 'Failed to analyze food: $e';
     }
   }
 
-  Future<void> analyzeFood(BuildContext context, String ingredients,
-      void Function(FoodAnalysisResponse) callback) async {
+  Future<void> analyzeFood(
+      String ingredients, void Function(FoodAnalysisResponse) callback) async {
     final payload = {'ingredients': ingredients};
 
-    try {
-      final foodAnalysisResponse = await _requestToAnalyzeFood(payload);
+    final foodAnalysisResponse = await _requestToAnalyzeFood(payload);
 
-      callback(foodAnalysisResponse);
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error analyzing food: $e')),
-        );
-      }
-    }
+    callback(foodAnalysisResponse);
   }
 }
