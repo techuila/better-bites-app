@@ -10,7 +10,7 @@ class FoodAiService {
   // create private function
   Future<FoodAnalysisResponse> _requestToAnalyzeFood(
       Map<String, dynamic> requestBody) async {
-    final url = Uri.http(_baseUrl, 'analyze');
+    final url = Uri.https(_baseUrl, 'analyze');
     try {
       debugPrint('Requesting food analysis from $url');
 
