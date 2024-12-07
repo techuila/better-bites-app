@@ -1,7 +1,8 @@
 import 'dart:io';
 
-import 'package:betterbitees/services/DTOs/food_analysis.dart';
-import 'package:betterbitees/services/food_ai_service.dart';
+import 'package:betterbitees/models/food_analysis.dart';
+import 'package:betterbitees/repositories/food_analysis_repo.dart';
+import 'package:betterbitees/services/food_analysis_service.dart';
 import 'package:betterbitees/services/text_recognition_service.dart';
 import 'package:betterbitees/ui/camera.dart';
 import 'package:flutter_svg/svg.dart';
@@ -18,11 +19,13 @@ class AfterScan extends StatefulWidget {
 }
 
 class _AfterScanState extends State<AfterScan> {
-  final foodAiService = FoodAiService();
+  final foodAiService =
+      FoodAnalysisService(foodAnalysisRepo: FoodAnalysisRepo());
   final textRecognition = TextRecognitionService();
   int _selectedIndex = 0;
   bool _isLoading = true;
-  FoodAnalysisResponse foodAnalysisResponse = FoodAnalysisResponse(
+  FoodAnalysis foodAnalysisResponse = FoodAnalysis(
+    title: '',
     suitableIngredients: [],
     unsuitableIngredients: [],
     healthTips: [],
@@ -44,7 +47,8 @@ class _AfterScanState extends State<AfterScan> {
         return;
       }
 
-      await foodAiService.analyzeFood(recognizedText!, (foodAnalysisResponse) {
+      await foodAiService.analyzeFood(recognizedText!, widget.imageFile,
+          (foodAnalysisResponse) {
         setState(() {
           this.foodAnalysisResponse = foodAnalysisResponse;
           _isLoading = false;
