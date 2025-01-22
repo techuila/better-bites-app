@@ -1,5 +1,5 @@
-import 'package:betterbitees/ui/info.dart';
-import 'package:betterbitees/ui/profiling.dart';
+import 'package:betterbitees/screens/info.dart';
+import 'package:betterbitees/screens/profiling.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

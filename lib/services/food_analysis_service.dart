@@ -74,4 +74,8 @@ class FoodAnalysisService {
 
     callback(foodAnalysis);
   }
+
+  Future<List<Future<FoodAnalysis>>> getAll() async {
+    return await foodAnalysisRepo.getAll();
+  }
 }

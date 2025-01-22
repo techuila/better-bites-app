@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:betterbitees/ui/after_scan.dart';
-import 'package:betterbitees/ui/history.dart';
+import 'package:betterbitees/screens/after_scan.dart';
+import 'package:betterbitees/screens/history.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';

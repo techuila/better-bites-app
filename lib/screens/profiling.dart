@@ -1,4 +1,4 @@
-import 'package:betterbitees/ui/camera.dart';
+import 'package:betterbitees/screens/camera.dart';
 import 'package:flutter/material.dart';
 
 class ProfilingQuestionsPage extends StatefulWidget {

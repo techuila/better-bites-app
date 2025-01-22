@@ -4,6 +4,26 @@ import 'package:flutter/widgets.dart';
 import 'package:sqflite/sqflite.dart';
 
 class FoodAnalysisRepo {
+  Future<List<Future<FoodAnalysis>>> getAll() async {
+    final db = await DBHelper.open();
+    final foods = await db.query('food_analysis');
+
+    final foodList = foods.map((food) async {
+      final suitableIngredients = await _getSuitableIngredients(food['id'] as String);
+      final unsuitableIngredients = await _getUnsuitableIngredients(food['id'] as String);
+      final healthTips = await _getHealthTips(food['id'] as String);
+
+      return FoodAnalysis.fromJson({
+        ...food,
+        'suitable_ingredients': suitableIngredients,
+        'unsuitable_ingredients': unsuitableIngredients,
+        'health_tips': healthTips
+      });
+    }).toList();
+
+    return foodList;
+  }
+
   Future<FoodAnalysis> getFoodAnalysis(String foodId) async {
     final db = await DBHelper.open();
     final food =
@@ -13,14 +33,9 @@ class FoodAnalysisRepo {
       throw Exception('Food not found');
     }
 
-    final suitableIngredients = await db.query('suitable_ingredients',
-        where: 'id = ?', whereArgs: [food.first['id']]);
-
-    final unsuitableIngredients = await db.query('unsuitable_ingredients',
-        where: 'id = ?', whereArgs: [food.first['id']]);
-
-    final healthTips = await db
-        .query('health_tips', where: 'id = ?', whereArgs: [food.first['id']]);
+    final suitableIngredients = await _getSuitableIngredients(foodId);
+    final unsuitableIngredients = await _getUnsuitableIngredients(foodId);
+    final healthTips = await _getHealthTips(foodId);
 
     return FoodAnalysis.fromJson({
       'id': food.first['id'],
@@ -30,6 +45,30 @@ class FoodAnalysisRepo {
       'unsuitable_ingredients': unsuitableIngredients,
       'health_tips': healthTips
     });
+  }
+
+  Future<dynamic> _getSuitableIngredients(String foodId) async {
+    final db = await DBHelper.open();
+    final ingredients = await db.query('suitable_ingredients',
+        where: 'food_analysis_id = ?', whereArgs: [foodId]);
+
+    return ingredients;
+  }
+
+  Future<dynamic> _getUnsuitableIngredients(String foodId) async {
+    final db = await DBHelper.open();
+    final ingredients = await db.query('unsuitable_ingredients',
+        where: 'food_analysis_id = ?', whereArgs: [foodId]);
+
+    return ingredients;
+  }
+
+  Future<dynamic> _getHealthTips(String foodId) async {
+    final db = await DBHelper.open();
+    final tips = await db.query('health_tips',
+        where: 'food_analysis_id = ?', whereArgs: [foodId]);
+
+    return tips;
   }
 
   Future<int> create(FoodAnalysis food) async {

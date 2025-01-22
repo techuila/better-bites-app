@@ -4,7 +4,7 @@ import 'package:betterbitees/models/food_analysis.dart';
 import 'package:betterbitees/repositories/food_analysis_repo.dart';
 import 'package:betterbitees/services/food_analysis_service.dart';
 import 'package:betterbitees/services/text_recognition_service.dart';
-import 'package:betterbitees/ui/camera.dart';
+import 'package:betterbitees/screens/camera.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +20,7 @@ class AfterScan extends StatefulWidget {
 
 class _AfterScanState extends State<AfterScan> {
   final foodAiService =
-      FoodAnalysisService(foodAnalysisRepo: FoodAnalysisRepo());
+FoodAnalysisService(foodAnalysisRepo: FoodAnalysisRepo());
   final textRecognition = TextRecognitionService();
   int _selectedIndex = 0;
   bool _isLoading = true;
