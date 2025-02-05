@@ -10,9 +10,10 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:flutter/material.dart';
 
 class AfterScan extends StatefulWidget {
-  final File imageFile;
+  final File? imageFile;
+  final FoodAnalysis? foodAnalysis;
 
-  const AfterScan({super.key, required this.imageFile});
+  const AfterScan({super.key, this.imageFile, this.foodAnalysis });
 
   @override
   _AfterScanState createState() => _AfterScanState();
@@ -35,19 +36,26 @@ FoodAnalysisService(foodAnalysisRepo: FoodAnalysisRepo());
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _performTextAndFoodAnalysis();
+      if (widget.foodAnalysis != null) {
+        setState(() {
+          foodAnalysisResponse = widget.foodAnalysis!;
+          _isLoading = false;
+        });
+      } else {
+        _performTextAndFoodAnalysis();
+      }
     });
   }
 
   Future<void> _performTextAndFoodAnalysis() async {
-    textRecognition.recognizeText(context, widget.imageFile,
+    textRecognition.recognizeText(context, widget.imageFile!,
         (recognizedText, error) async {
       if (error != null) {
         Navigator.of(context).pop(true);
         return;
       }
 
-      await foodAiService.analyzeFood(recognizedText!, widget.imageFile,
+      await foodAiService.analyzeFood(recognizedText!, widget.imageFile!,
           (foodAnalysisResponse) {
         setState(() {
           this.foodAnalysisResponse = foodAnalysisResponse;
@@ -99,6 +107,19 @@ FoodAnalysisService(foodAnalysisRepo: FoodAnalysisRepo());
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            foodAnalysisResponse.title,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: const Color(0xFF0d522c),
+                              fontFamily: 'Poppins',
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                         Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Text(

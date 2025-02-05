@@ -9,9 +9,10 @@ class FoodAnalysisRepo {
     final foods = await db.query('food_analysis');
 
     final foodList = foods.map((food) async {
-      final suitableIngredients = await _getSuitableIngredients(food['id'] as String);
-      final unsuitableIngredients = await _getUnsuitableIngredients(food['id'] as String);
-      final healthTips = await _getHealthTips(food['id'] as String);
+      final foodId = int.parse(food['id'].toString());
+      final suitableIngredients = await _getSuitableIngredients(foodId);
+      final unsuitableIngredients = await _getUnsuitableIngredients(foodId);
+      final healthTips = await _getHealthTips(foodId);
 
       return FoodAnalysis.fromJson({
         ...food,
@@ -19,12 +20,12 @@ class FoodAnalysisRepo {
         'unsuitable_ingredients': unsuitableIngredients,
         'health_tips': healthTips
       });
-    }).toList();
+    });
 
-    return foodList;
+    return foodList.toList();
   }
 
-  Future<FoodAnalysis> getFoodAnalysis(String foodId) async {
+  Future<FoodAnalysis> getFoodAnalysis(int foodId) async {
     final db = await DBHelper.open();
     final food =
         await db.query('food_analysis', where: 'id = ?', whereArgs: [foodId]);
@@ -47,7 +48,7 @@ class FoodAnalysisRepo {
     });
   }
 
-  Future<dynamic> _getSuitableIngredients(String foodId) async {
+  Future<dynamic> _getSuitableIngredients(int foodId) async {
     final db = await DBHelper.open();
     final ingredients = await db.query('suitable_ingredients',
         where: 'food_analysis_id = ?', whereArgs: [foodId]);
@@ -55,7 +56,7 @@ class FoodAnalysisRepo {
     return ingredients;
   }
 
-  Future<dynamic> _getUnsuitableIngredients(String foodId) async {
+  Future<dynamic> _getUnsuitableIngredients(int foodId) async {
     final db = await DBHelper.open();
     final ingredients = await db.query('unsuitable_ingredients',
         where: 'food_analysis_id = ?', whereArgs: [foodId]);
@@ -63,7 +64,7 @@ class FoodAnalysisRepo {
     return ingredients;
   }
 
-  Future<dynamic> _getHealthTips(String foodId) async {
+  Future<dynamic> _getHealthTips(int foodId) async {
     final db = await DBHelper.open();
     final tips = await db.query('health_tips',
         where: 'food_analysis_id = ?', whereArgs: [foodId]);
