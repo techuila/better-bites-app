@@ -1,4 +1,6 @@
+import 'package:betterbitees/repositories/profiling_repo.dart';
 import 'package:betterbitees/screens/camera.dart';
+import 'package:betterbitees/services/profiling_service.dart';
 import 'package:flutter/material.dart';
 
 class ProfilingQuestionsPage extends StatefulWidget {
@@ -9,6 +11,7 @@ class ProfilingQuestionsPage extends StatefulWidget {
 }
 
 class _ProfilingQuestionsPageState extends State<ProfilingQuestionsPage> {
+  final ProfilingService profilingService = ProfilingService(profilingRepo: ProfilingRepo());
   String _age = '';
   String _sex = '';
   String? _selectedHeightRange;
@@ -65,7 +68,8 @@ class _ProfilingQuestionsPageState extends State<ProfilingQuestionsPage> {
     }
   }
 
-  void _submit() {
+  Future<void> _submit() async {
+    await profilingService.saveProfile(age: _age, gender: _sex, height: _selectedHeightRange!, weight: _selectedWeightRange!, healthCondition: _healthCondition);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => Camera()),

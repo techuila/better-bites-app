@@ -1,10 +1,17 @@
+import 'package:betterbitees/repositories/profiling_repo.dart';
+import 'package:betterbitees/screens/camera.dart';
 import 'package:betterbitees/screens/info.dart';
 import 'package:betterbitees/screens/profiling.dart';
+import 'package:betterbitees/services/profiling_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final ProfilingService profilingService = ProfilingService(
+    profilingRepo: ProfilingRepo(),
+  );
+
+  HomePage({super.key});
 
   void _showExitDialog(BuildContext context) {
     showDialog(
@@ -117,12 +124,22 @@ class HomePage extends StatelessWidget {
             //SCAN BUTTON
             const SizedBox(height: 18),
             OutlinedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ProfilingQuestionsPage()),
-                );
+              onPressed: () async {
+                final profile = await profilingService.getProfile();
+
+                if (profile == null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ProfilingQuestionsPage()),
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => Camera()),
+                  );
+                }
               },
               style: OutlinedButton.styleFrom(
                 backgroundColor: const Color(0xFF0d522c),

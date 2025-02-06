@@ -12,6 +12,8 @@ class DBHelper {
       onCreate: (db, version) async {
         Batch batch = db.batch();
         batch.execute(
+            'CREATE TABLE profiling(id INTEGER PRIMARY KEY, age TEXT, gender TEXT, height TEXT, weight TEXT, health_condition DATETIME DEFAULT CURRENT_TIMESTAMP);');
+        batch.execute(
             'CREATE TABLE food_analysis(id INTEGER PRIMARY KEY, title TEXT, image_path TEXT, recognized_text TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP);');
         batch.execute(
             'CREATE TABLE suitable_ingredients(id INTEGER PRIMARY KEY, food_analysis_id INTEGER, name TEXT, description TEXT);');
@@ -24,6 +26,7 @@ class DBHelper {
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion != newVersion) {
           Batch batch = db.batch();
+          batch.execute('DROP TABLE IF EXISTS profiling;');
           batch.execute('DROP TABLE IF EXISTS food_analysis;');
           batch.execute('DROP TABLE IF EXISTS suitable_ingredients;');
           batch.execute('DROP TABLE IF EXISTS unsuitable_ingredients;');
