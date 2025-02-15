@@ -11,7 +11,8 @@ class ProfilingQuestionsPage extends StatefulWidget {
 }
 
 class _ProfilingQuestionsPageState extends State<ProfilingQuestionsPage> {
-  final ProfilingService profilingService = ProfilingService(profilingRepo: ProfilingRepo());
+  final ProfilingService profilingService =
+      ProfilingService(profilingRepo: ProfilingRepo());
   String _age = '';
   String _sex = '';
   String? _selectedHeightRange;
@@ -21,6 +22,7 @@ class _ProfilingQuestionsPageState extends State<ProfilingQuestionsPage> {
 
 // lIST OF AGE OPTIONS
   List<String> ageOptions = [
+    "title:" "Please specify your age group.",
     'Under 18',
     '18-25',
     '26-35',
@@ -30,6 +32,7 @@ class _ProfilingQuestionsPageState extends State<ProfilingQuestionsPage> {
 
 // LIST OF HEIGHT OPTIONS
   final List<String> _heightOptions = [
+    "title:" "What is your height?",
     'Below 150 cm',
     '150-160 cm',
     '161-170 cm',
@@ -39,6 +42,7 @@ class _ProfilingQuestionsPageState extends State<ProfilingQuestionsPage> {
 
 // LIST OF WEIGHT OPTIONS
   final List<String> _weightOptions = [
+    "title:" "What is your weight?",
     'Under 50 kg',
     '50-60 kg',
     '61-70 kg',
@@ -48,6 +52,7 @@ class _ProfilingQuestionsPageState extends State<ProfilingQuestionsPage> {
 
   // LIST OF HEALTH CONDITIONS
   List<String> healthConditions = [
+    "title:" "Do you have any health conditions?",
     'Yes',
     'No',
   ];
@@ -69,7 +74,12 @@ class _ProfilingQuestionsPageState extends State<ProfilingQuestionsPage> {
   }
 
   Future<void> _submit() async {
-    await profilingService.saveProfile(age: _age, gender: _sex, height: _selectedHeightRange!, weight: _selectedWeightRange!, healthCondition: _healthCondition);
+    await profilingService.saveProfile(
+        age: _age,
+        gender: _sex,
+        height: _selectedHeightRange!,
+        weight: _selectedWeightRange!,
+        healthCondition: _healthCondition);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => Camera()),
