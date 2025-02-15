@@ -99,7 +99,7 @@ class _ProfilingQuestionsPageState extends State<ProfilingQuestionsPage> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
-          'Profiling Questions',
+          'Profiling Survey',
           style: TextStyle(
             fontFamily: 'Poppins',
             fontSize: 20,
