@@ -22,7 +22,6 @@ class _ProfilingQuestionsPageState extends State<ProfilingQuestionsPage> {
 
 // lIST OF AGE OPTIONS
   List<String> ageOptions = [
-    "title:" "Please specify your age group.",
     'Under 18',
     '18-25',
     '26-35',
@@ -32,7 +31,6 @@ class _ProfilingQuestionsPageState extends State<ProfilingQuestionsPage> {
 
 // LIST OF HEIGHT OPTIONS
   final List<String> _heightOptions = [
-    "title:" "What is your height?",
     'Below 150 cm',
     '150-160 cm',
     '161-170 cm',
@@ -42,7 +40,6 @@ class _ProfilingQuestionsPageState extends State<ProfilingQuestionsPage> {
 
 // LIST OF WEIGHT OPTIONS
   final List<String> _weightOptions = [
-    "title:" "What is your weight?",
     'Under 50 kg',
     '50-60 kg',
     '61-70 kg',
@@ -52,7 +49,6 @@ class _ProfilingQuestionsPageState extends State<ProfilingQuestionsPage> {
 
   // LIST OF HEALTH CONDITIONS
   List<String> healthConditions = [
-    "title:" "Do you have any health conditions?",
     'Yes',
     'No',
   ];
@@ -86,27 +82,23 @@ class _ProfilingQuestionsPageState extends State<ProfilingQuestionsPage> {
     );
   }
 
-  void _skipToCamera() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => Camera()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.green.shade50,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
           'Profiling Survey',
           style: TextStyle(
             fontFamily: 'Poppins',
-            fontSize: 20,
+            fontSize: 16,
             color: Color(0xff1A5319),
             fontWeight: FontWeight.w500,
           ),
         ),
+        backgroundColor: Colors.green.shade50,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(25, 8, 25, 0),
@@ -414,24 +406,6 @@ class _ProfilingQuestionsPageState extends State<ProfilingQuestionsPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // SKIP BUTTON
-                        if (_currentPage == 0) ...[
-                          //SizedBox(width: 10),
-                          TextButton(
-                            onPressed: _skipToCamera,
-                            child: Text(
-                              'Skip',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 15,
-                                color: Color(0xff1A5319),
-                                decoration: TextDecoration.underline,
-                                decorationColor: Color(0xff1A5319),
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
-                        ],
                         if (_currentPage > 0)
                           OutlinedButton(
                             onPressed: _previousPage,
